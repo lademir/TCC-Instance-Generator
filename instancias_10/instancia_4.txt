@@ -1,0 +1,53 @@
+Seed: 8617473556 - Quantidade de tarefas: 10 - Quantidade de recursos: 5
+Recursos renováveis [470, 228, 379, 272, 447]
+Tarefa 0 - Sucessores: [1, 2, 3, 6, 8, ] 
+Modos:
+Modo 0 - Duração: 0 - Uso de recurso: [0, 0, 0, 0, 0]
+
+Tarefa 1 - Sucessores: [8, 5, 7, ] 
+Modos:
+Modo 0 - Duração: 89 - Uso de recurso: [63, 86, 102, 24, 76]
+
+Tarefa 2 - Sucessores: [4, 5, 7, ] 
+Modos:
+Modo 0 - Duração: 56 - Uso de recurso: [66, 42, 68, 199, 98]
+
+Tarefa 3 - Sucessores: [9, ] 
+Modos:
+Modo 0 - Duração: 28 - Uso de recurso: [115, 300, 274, 381, 201]
+Modo 1 - Duração: 31 - Uso de recurso: [112, 112, 81, 89, 154]
+
+Tarefa 4 - Sucessores: [9, ] 
+Modos:
+Modo 0 - Duração: 83 - Uso de recurso: [44, 44, 17, 33, 31]
+
+Tarefa 5 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 36 - Uso de recurso: [290, 110, 163, 76, 56]
+
+Tarefa 6 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 29 - Uso de recurso: [190, 215, 339, 86, 82]
+
+Tarefa 7 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 14 - Uso de recurso: [291, 480, 831, 145, 274]
+
+Tarefa 8 - Sucessores: [10, ] 
+Modos:
+Modo 0 - Duração: 25 - Uso de recurso: [336, 235, 278, 384, 427]
+Modo 1 - Duração: 98 - Uso de recurso: [36, 96, 58, 112, 107]
+
+Tarefa 9 - Sucessores: [10, ] 
+Modos:
+Modo 0 - Duração: 18 - Uso de recurso: [386, 640, 113, 200, 226]
+Modo 1 - Duração: 93 - Uso de recurso: [23, 45, 64, 77, 14]
+
+Tarefa 10 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 47 - Uso de recurso: [211, 240, 45, 76, 160]
+
+Tarefa 11 - Sucessores: [] 
+Modos:
+Modo 0 - Duração: 0 - Uso de recurso: [0, 0, 0, 0, 0]
+

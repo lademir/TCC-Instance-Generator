@@ -1,0 +1,70 @@
+Seed: 8622096805 - Quantidade de tarefas: 10 - Quantidade de recursos: 2
+Recursos renováveis [539, 982]
+Tarefa 0 - Sucessores: [1, 2, 5, 6, 10, ] 
+Modos:
+Modo 0 - Duração: 0 - Uso de recurso: [0, 0]
+
+Tarefa 1 - Sucessores: [8, 3, 4, 7, ] 
+Modos:
+Modo 0 - Duração: 83 - Uso de recurso: [37, 127]
+Modo 1 - Duração: 65 - Uso de recurso: [169, 90]
+Modo 2 - Duração: 32 - Uso de recurso: [168, 168]
+
+Tarefa 2 - Sucessores: [8, 9, 10, ] 
+Modos:
+Modo 0 - Duração: 75 - Uso de recurso: [158, 17]
+Modo 1 - Duração: 58 - Uso de recurso: [169, 151]
+
+Tarefa 3 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 96 - Uso de recurso: [20, 122]
+Modo 1 - Duração: 48 - Uso de recurso: [60, 55]
+
+Tarefa 4 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 100 - Uso de recurso: [14, 84]
+Modo 1 - Duração: 16 - Uso de recurso: [210, 120]
+Modo 2 - Duração: 84 - Uso de recurso: [132, 122]
+Modo 3 - Duração: 71 - Uso de recurso: [43, 57]
+
+Tarefa 5 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 18 - Uso de recurso: [100, 333]
+Modo 1 - Duração: 61 - Uso de recurso: [76, 139]
+
+Tarefa 6 - Sucessores: [8, 9, 10, ] 
+Modos:
+Modo 0 - Duração: 74 - Uso de recurso: [152, 68]
+Modo 1 - Duração: 39 - Uso de recurso: [172, 107]
+Modo 2 - Duração: 14 - Uso de recurso: [368, 94]
+
+Tarefa 7 - Sucessores: [9, 10, ] 
+Modos:
+Modo 0 - Duração: 56 - Uso de recurso: [90, 160]
+Modo 1 - Duração: 110 - Uso de recurso: [87, 40]
+Modo 2 - Duração: 18 - Uso de recurso: [253, 133]
+Modo 3 - Duração: 55 - Uso de recurso: [135, 24]
+
+Tarefa 8 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 97 - Uso de recurso: [80, 72]
+Modo 1 - Duração: 56 - Uso de recurso: [72, 135]
+Modo 2 - Duração: 80 - Uso de recurso: [117, 91]
+
+Tarefa 9 - Sucessores: [10, ] 
+Modos:
+Modo 0 - Duração: 59 - Uso de recurso: [109, 122]
+Modo 1 - Duração: 64 - Uso de recurso: [52, 133]
+Modo 2 - Duração: 92 - Uso de recurso: [95, 83]
+
+Tarefa 10 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 99 - Uso de recurso: [105, 14]
+Modo 1 - Duração: 87 - Uso de recurso: [70, 81]
+Modo 2 - Duração: 75 - Uso de recurso: [91, 100]
+Modo 3 - Duração: 113 - Uso de recurso: [41, 57]
+
+Tarefa 11 - Sucessores: [] 
+Modos:
+Modo 0 - Duração: 0 - Uso de recurso: [0, 0]
+

@@ -1,0 +1,62 @@
+Seed: 3391002698 - Quantidade de tarefas: 10 - Quantidade de recursos: 5
+Recursos renováveis [767, 474, 128, 572, 943]
+Tarefa 0 - Sucessores: [1, 2, 3, 4, 5, 6, 9, ] 
+Modos:
+Modo 0 - Duração: 0 - Uso de recurso: [0, 0, 0, 0, 0]
+
+Tarefa 1 - Sucessores: [8, ] 
+Modos:
+Modo 0 - Duração: 96 - Uso de recurso: [81, 22, 107, 52, 42]
+Modo 1 - Duração: 18 - Uso de recurso: [133, 553, 146, 380, 386]
+
+Tarefa 2 - Sucessores: [8, 7, ] 
+Modos:
+Modo 0 - Duração: 59 - Uso de recurso: [44, 52, 142, 24, 152]
+
+Tarefa 3 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 109 - Uso de recurso: [39, 23, 50, 107, 59]
+Modo 1 - Duração: 108 - Uso de recurso: [21, 40, 67, 91, 73]
+Modo 2 - Duração: 57 - Uso de recurso: [168, 126, 63, 174, 120]
+Modo 3 - Duração: 107 - Uso de recurso: [85, 34, 77, 84, 39]
+
+Tarefa 4 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 16 - Uso de recurso: [427, 727, 412, 232, 420]
+Modo 1 - Duração: 29 - Uso de recurso: [409, 177, 252, 66, 95]
+
+Tarefa 5 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 17 - Uso de recurso: [423, 536, 204, 656, 465]
+
+Tarefa 6 - Sucessores: [8, 9, 10, 7, ] 
+Modos:
+Modo 0 - Duração: 56 - Uso de recurso: [205, 85, 38, 139, 111]
+
+Tarefa 7 - Sucessores: [9, ] 
+Modos:
+Modo 0 - Duração: 102 - Uso de recurso: [61, 17, 89, 30, 28]
+Modo 1 - Duração: 22 - Uso de recurso: [321, 545, 141, 409, 458]
+
+Tarefa 8 - Sucessores: [9, ] 
+Modos:
+Modo 0 - Duração: 98 - Uso de recurso: [91, 97, 40, 37, 99]
+Modo 1 - Duração: 28 - Uso de recurso: [188, 338, 94, 77, 180]
+
+Tarefa 9 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 36 - Uso de recurso: [143, 313, 276, 176, 86]
+Modo 1 - Duração: 10 - Uso de recurso: [972, 144, 192, 828, 540]
+Modo 2 - Duração: 15 - Uso de recurso: [744, 512, 720, 496, 720]
+Modo 3 - Duração: 11 - Uso de recurso: [992, 698, 512, 621, 829]
+
+Tarefa 10 - Sucessores: [11, ] 
+Modos:
+Modo 0 - Duração: 22 - Uso de recurso: [120, 316, 76, 272, 130]
+Modo 1 - Duração: 26 - Uso de recurso: [78, 106, 249, 69, 87]
+Modo 2 - Duração: 28 - Uso de recurso: [64, 180, 197, 342, 312]
+
+Tarefa 11 - Sucessores: [] 
+Modos:
+Modo 0 - Duração: 0 - Uso de recurso: [0, 0, 0, 0, 0]
+
