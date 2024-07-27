@@ -209,16 +209,11 @@ class Instance:
         else:
             maximal_non_redundant_arcs = self.qtde_tarefas - 2 + ((self.qtde_tarefas-1)/2) * ((self.qtde_tarefas-3)/2)
             pass
-    
-        print(f"Maximal non redundant arcs: {maximal_non_redundant_arcs}")
 
         # media dos arcos nao redundantes por nodo
         c = 0
         non_start_activities = activities.copy() + finish_activities.copy()
         non_start_activities = sorted(non_start_activities)
-        print(f"Start activities: {start_activities}")
-        print(f"Finish activities: {finish_activities}")
-        print(f"Non start activities: {non_start_activities}")
         
 
         def has_path(graph, start, end, visited):
@@ -236,66 +231,49 @@ class Instance:
 
         for ac in non_start_activities:
             pred = random.choice(start_activities + activities)
-            while pred == ac:
+            while pred == ac or len(sucessores[pred]) >= self.max_sucessores or has_path(sucessores, ac, pred, set()):
                 pred = random.choice(start_activities + activities)
-            if pred not in sucessores[ac] and len(predecessores[ac]) < self.max_sucessores and not has_path(sucessores, ac, pred, set()):
-                predecessores[ac].add(pred)
-                sucessores[pred].add(ac)
-                total_arcs.append((pred, ac))
+            
+            predecessores[ac].add(pred)
+            sucessores[pred].add(ac)
+            total_arcs.append((pred, ac))
+
         for ac in sorted(start_activities + activities):
             if len(sucessores[ac]) == 0:
-                print(f"Colocando sucessor para {ac}")
+                # print(f"Colocando sucessor para {ac}")
                 suc = random.choice(non_start_activities)  
-                while suc == ac:
+                while suc == ac or has_path(sucessores, suc, ac, set()):
                     suc = random.choice(non_start_activities)
                 sucessores[ac].add(suc)
                 predecessores[suc].add(ac)
                 total_arcs.append((ac, suc))
-
-        for i in range(self.qtde_tarefas + 2):
-            print(f"{i}: {sucessores[i]}")
-            # print(f"{i}: {predecessores[i]} - {sucessores[i]}")
         
         redundant_arcs = find_redundant_arcs(sucessores)
         non_redundant_arcs = [arc for arc in total_arcs if arc not in redundant_arcs]
         c = len(non_redundant_arcs)/len(sucessores)
-        print(f"Total arcs: {total_arcs}")
-        print(f"Redundant arcs: {redundant_arcs}")
-        print(f"Non-redundant arcs: {non_redundant_arcs} - {len(non_redundant_arcs)}")
-        print(f"Network complexity: {len(non_redundant_arcs)/len(sucessores)}")
         
 
-    
-        while c < 3:
+        # for i in range(100):
+        while c < 1.5 and len(non_redundant_arcs) < maximal_non_redundant_arcs:
             for ac in sorted(activities + finish_activities):
-                pred = random.choice(non_start_activities + start_activities)
+                pred = random.choice(activities + start_activities)
                 while pred == ac:
-                    pred = random.choice(non_start_activities + start_activities)
-                if len(sucessores[pred]) < self.max_sucessores and pred not in sucessores[ac] and not has_path(sucessores, ac, pred, set()):
+                    pred = random.choice(activities + start_activities)
+                if  len(sucessores[pred]) < self.max_sucessores and not has_path(sucessores, ac, pred, set()): # and pred not in sucessores[ac]
                     predecessores[ac].add(pred)
                     sucessores[pred].add(ac)
                     total_arcs.append((pred, ac))
-                    if is_redundant_arc([list(h) for h in sucessores], pred, ac):
-                        print(f"Redundant arc: {pred} -> {ac}")
+                    total_arcs = list(set(total_arcs))
 
             # se todos possuem o maximo de sucessores, parar de adicionar arcos
-            if all([len(sucessores[ac]) == self.max_sucessores for ac in activities]):
+            if all([len(sucessores[ac]) == self.max_sucessores for ac in (activities )]):
+                # print("All activities have the maximum number of successors")
                 break
 
             redundant_arcs = find_redundant_arcs(sucessores)
-            print(f"Total arcs: {total_arcs} = {len(total_arcs)}")
-            print(f"Redundant arcs: {redundant_arcs} = {len(redundant_arcs)}")
             non_redundant_arcs = [arc for arc in total_arcs if arc not in redundant_arcs]
             c = len(non_redundant_arcs)/len(sucessores)
-            print(f"Non-redundant arcs: {non_redundant_arcs} = {len(non_redundant_arcs)}")
-            print(f"Network complexity: {len(non_redundant_arcs)/len(sucessores)}")
-            print(f"Redundant arcs: {len(redundant_arcs)}")
-            
-            # input()
 
-        # print(f"Remaining activities: {activities}")
-        # print(f"Start activities: {start_activities}")
-        # print(f"Finish activities: {finish_activities}")
 
         # for i in range(self.qtde_tarefas + 2):
         #     print(f"{i}: {predecessores[i]} - {sucessores[i]}")
@@ -342,7 +320,7 @@ def find_redundant_arcs(graph:List[set[int]]):
 
 
 if __name__ == "__main__":
-    instance = Instance(seed=1916069400, qtde_tarefas=10)
+    instance = Instance(seed=19, qtde_tarefas=10)
     instance.visualizar_grafo()
     # with open('instance.txt', 'w') as f:
     #     f.write(f"RF renovavel: {instance.calculate_resource_factor_for_type(renovavel=True)}\n")
