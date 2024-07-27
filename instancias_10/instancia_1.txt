@@ -1,70 +1,66 @@
-Seed: 8622096805 - Quantidade de tarefas: 10 - Quantidade de recursos: 2
-Recursos renováveis [539, 982]
-Tarefa 0 - Sucessores: [1, 2, 5, 6, 10, ] 
+Seed: 6371416049 - Quantidade de tarefas: 10 - Quantidade de recursos: 2 - Quantidade de recursos nao renovaveis: 4
+Recursos renováveis [53, 48]
+Recursos nao renovaveis [251, 178, 156, 261]
+Tarefa 0 - Sucessores: [1, 2, 3, 4, 5, 6, 7, ] 
 Modos:
-Modo 0 - Duração: 0 - Uso de recurso: [0, 0]
+Modo 0 - Duração: 0 - Uso de recurso renovavel: [0, 0] - Uso de recurso nao renovavel: [0, 0, 0, 0]
 
-Tarefa 1 - Sucessores: [8, 3, 4, 7, ] 
+Tarefa 1 - Sucessores: [2, ] 
 Modos:
-Modo 0 - Duração: 83 - Uso de recurso: [37, 127]
-Modo 1 - Duração: 65 - Uso de recurso: [169, 90]
-Modo 2 - Duração: 32 - Uso de recurso: [168, 168]
+Modo 0 - Duração: 36 - Uso de recurso renovavel: [0, 0] - Uso de recurso nao renovavel: [280, 0, 253, 0]
+Modo 1 - Duração: 58 - Uso de recurso renovavel: [0, 144] - Uso de recurso nao renovavel: [0, 0, 161, 167]
+Modo 2 - Duração: 94 - Uso de recurso renovavel: [56, 12] - Uso de recurso nao renovavel: [0, 98, 0, 66]
+Modo 3 - Duração: 34 - Uso de recurso renovavel: [0, 0] - Uso de recurso nao renovavel: [0, 0, 0, 215]
 
-Tarefa 2 - Sucessores: [8, 9, 10, ] 
+Tarefa 2 - Sucessores: [11, ] 
 Modos:
-Modo 0 - Duração: 75 - Uso de recurso: [158, 17]
-Modo 1 - Duração: 58 - Uso de recurso: [169, 151]
+Modo 0 - Duração: 75 - Uso de recurso renovavel: [64, 51] - Uso de recurso nao renovavel: [0, 59, 144, 0]
 
-Tarefa 3 - Sucessores: [11, ] 
+Tarefa 3 - Sucessores: [10, ] 
 Modos:
-Modo 0 - Duração: 96 - Uso de recurso: [20, 122]
-Modo 1 - Duração: 48 - Uso de recurso: [60, 55]
+Modo 0 - Duração: 96 - Uso de recurso renovavel: [102, 85] - Uso de recurso nao renovavel: [15, 0, 0, 0]
+Modo 1 - Duração: 23 - Uso de recurso renovavel: [490, 203] - Uso de recurso nao renovavel: [307, 0, 0, 360]
+Modo 2 - Duração: 119 - Uso de recurso renovavel: [61, 0] - Uso de recurso nao renovavel: [48, 10, 0, 86]
 
-Tarefa 4 - Sucessores: [11, ] 
+Tarefa 4 - Sucessores: [8, ] 
 Modos:
-Modo 0 - Duração: 100 - Uso de recurso: [14, 84]
-Modo 1 - Duração: 16 - Uso de recurso: [210, 120]
-Modo 2 - Duração: 84 - Uso de recurso: [132, 122]
-Modo 3 - Duração: 71 - Uso de recurso: [43, 57]
+Modo 0 - Duração: 54 - Uso de recurso renovavel: [213, 0] - Uso de recurso nao renovavel: [0, 86, 175, 0]
 
 Tarefa 5 - Sucessores: [11, ] 
 Modos:
-Modo 0 - Duração: 18 - Uso de recurso: [100, 333]
-Modo 1 - Duração: 61 - Uso de recurso: [76, 139]
+Modo 0 - Duração: 93 - Uso de recurso renovavel: [113, 0] - Uso de recurso nao renovavel: [0, 0, 0, 0]
+Modo 1 - Duração: 72 - Uso de recurso renovavel: [0, 61] - Uso de recurso nao renovavel: [0, 55, 16, 0]
 
-Tarefa 6 - Sucessores: [8, 9, 10, ] 
+Tarefa 6 - Sucessores: [10, ] 
 Modos:
-Modo 0 - Duração: 74 - Uso de recurso: [152, 68]
-Modo 1 - Duração: 39 - Uso de recurso: [172, 107]
-Modo 2 - Duração: 14 - Uso de recurso: [368, 94]
+Modo 0 - Duração: 39 - Uso de recurso renovavel: [138, 264] - Uso de recurso nao renovavel: [0, 0, 221, 169]
+Modo 1 - Duração: 83 - Uso de recurso renovavel: [86, 0] - Uso de recurso nao renovavel: [62, 0, 0, 39]
+Modo 2 - Duração: 105 - Uso de recurso renovavel: [0, 0] - Uso de recurso nao renovavel: [0, 0, 20, 0]
+Modo 3 - Duração: 82 - Uso de recurso renovavel: [0, 0] - Uso de recurso nao renovavel: [0, 54, 0, 105]
 
-Tarefa 7 - Sucessores: [9, 10, ] 
+Tarefa 7 - Sucessores: [8, ] 
 Modos:
-Modo 0 - Duração: 56 - Uso de recurso: [90, 160]
-Modo 1 - Duração: 110 - Uso de recurso: [87, 40]
-Modo 2 - Duração: 18 - Uso de recurso: [253, 133]
-Modo 3 - Duração: 55 - Uso de recurso: [135, 24]
+Modo 0 - Duração: 15 - Uso de recurso renovavel: [0, 200] - Uso de recurso nao renovavel: [0, 288, 712, 592]
+Modo 1 - Duração: 82 - Uso de recurso renovavel: [38, 0] - Uso de recurso nao renovavel: [0, 19, 0, 0]
+Modo 2 - Duração: 65 - Uso de recurso renovavel: [175, 145] - Uso de recurso nao renovavel: [120, 22, 0, 166]
+Modo 3 - Duração: 32 - Uso de recurso renovavel: [0, 0] - Uso de recurso nao renovavel: [217, 210, 150, 0]
 
-Tarefa 8 - Sucessores: [11, ] 
+Tarefa 8 - Sucessores: [9, ] 
 Modos:
-Modo 0 - Duração: 97 - Uso de recurso: [80, 72]
-Modo 1 - Duração: 56 - Uso de recurso: [72, 135]
-Modo 2 - Duração: 80 - Uso de recurso: [117, 91]
+Modo 0 - Duração: 21 - Uso de recurso renovavel: [0, 257] - Uso de recurso nao renovavel: [377, 0, 411, 440]
+Modo 1 - Duração: 66 - Uso de recurso renovavel: [0, 121] - Uso de recurso nao renovavel: [105, 67, 0, 0]
 
-Tarefa 9 - Sucessores: [10, ] 
+Tarefa 9 - Sucessores: [11, ] 
 Modos:
-Modo 0 - Duração: 59 - Uso de recurso: [109, 122]
-Modo 1 - Duração: 64 - Uso de recurso: [52, 133]
-Modo 2 - Duração: 92 - Uso de recurso: [95, 83]
+Modo 0 - Duração: 107 - Uso de recurso renovavel: [11, 0] - Uso de recurso nao renovavel: [0, 0, 53, 0]
+Modo 1 - Duração: 92 - Uso de recurso renovavel: [0, 0] - Uso de recurso nao renovavel: [95, 0, 62, 113]
+Modo 2 - Duração: 22 - Uso de recurso renovavel: [0, 0] - Uso de recurso nao renovavel: [130, 294, 0, 65]
 
 Tarefa 10 - Sucessores: [11, ] 
 Modos:
-Modo 0 - Duração: 99 - Uso de recurso: [105, 14]
-Modo 1 - Duração: 87 - Uso de recurso: [70, 81]
-Modo 2 - Duração: 75 - Uso de recurso: [91, 100]
-Modo 3 - Duração: 113 - Uso de recurso: [41, 57]
+Modo 0 - Duração: 39 - Uso de recurso renovavel: [163, 163] - Uso de recurso nao renovavel: [0, 0, 206, 0]
 
 Tarefa 11 - Sucessores: [] 
 Modos:
-Modo 0 - Duração: 0 - Uso de recurso: [0, 0]
+Modo 0 - Duração: 0 - Uso de recurso renovavel: [0, 0] - Uso de recurso nao renovavel: [0, 0, 0, 0]
 
