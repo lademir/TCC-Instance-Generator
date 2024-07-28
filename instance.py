@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 from typing import List, Dict, Set
 import graphviz
 
+
+from typing import Any
+
 class Graph:
     def __init__(self):
         self.nodes: Set[int] = set()
@@ -68,12 +71,13 @@ class Instance:
         self.min_duracao = 10
         self.max_recursos = 5
         self.min_recursos = 2
-        self.max_uso_recurso = 100
-        self.min_uso_recurso = 10
+        self.fator_max_uso_recurso = 100
+        self.fator_min_uso_recurso = 10
         self.min_modos = 1
         self.max_modos = 4
         self.max_sucessores = int(3)
         self.resource_factor = 0.5 # O que vai decidir se o recurso r é usado ou não pela atividade
+        self.resource_strength = 0.5
         
         # Use a seed para inicializar o gerador de números aleatórios
         self.seed: int = seed
@@ -95,7 +99,7 @@ class Instance:
         self.start()
     
     def __str__(self):
-        out = f"Seed: {self.seed} - Quantidade de tarefas: {self.qtde_tarefas} - Quantidade de recursos: {self.qtde_recursos_renovavel} - Quantidade de recursos nao renovaveis: {self.qtde_recursos_nao_renovavel}\n"
+        out = f"Seed: {self.seed} - Quantidade de tarefas: {self.qtde_tarefas} - Quantidade de recursos renovaveis: {self.qtde_recursos_renovavel} - Quantidade de recursos nao renovaveis: {self.qtde_recursos_nao_renovavel}\n"
         out += f"Recursos renováveis {self.recursos_renovaveis}\n"
         out += f"Recursos nao renovaveis {self.recursos_nao_renovaveis}\n"
         for i in range(self.qtde_tarefas + 2):
@@ -130,10 +134,129 @@ class Instance:
         self.gerar_recursos()
 
     def gerar_recursos(self):
-        for _ in range(self.qtde_recursos_renovavel):
-            self.recursos_renovaveis.append(random.randint(10,100)) # min e max que pode ser usado por uma atividade
-        for _ in range(self.qtde_recursos_nao_renovavel):
-            self.recursos_nao_renovaveis.append(random.randint(100,350))
+        # for _ in range(self.qtde_recursos_renovavel):
+        #     self.recursos_renovaveis.append(random.randint(10,100)) # min e max que pode ser usado por uma atividade
+        # for _ in range(self.qtde_recursos_nao_renovavel):
+        #     self.recursos_nao_renovaveis.append(random.randint(100,350))
+
+        maximal_non_renewable = [0 for _ in range(self.qtde_recursos_nao_renovavel)]
+        minimal_non_renewable = [999999 for _ in range(self.qtde_recursos_nao_renovavel)]
+        maximal_renewable = [0 for _ in range(self.qtde_recursos_renovavel)]
+        minimal_renewable = [999999 for _ in range(self.qtde_recursos_renovavel)]
+        k_non_renewable_min = [0 for _ in range(self.qtde_recursos_nao_renovavel)]
+        k_non_renewable_max = [0 for _ in range(self.qtde_recursos_nao_renovavel)]
+        k_renewable_min = [0 for _ in range(self.qtde_recursos_renovavel)]
+        horizon = 0
+
+        for i, task in self.tarefas.items():
+            if i == 0 or i == self.qtde_tarefas + 1:
+                continue
+            horizon_i = 0
+            for modo in task.modos:
+                horizon_i = max(horizon_i, modo.duracao)
+                for j in range(self.qtde_recursos_renovavel):
+                    maximal_renewable[j] = max(maximal_renewable[j], modo.qtde_recurso_renovavel[j])
+                    minimal_renewable[j] = min(minimal_renewable[j], modo.qtde_recurso_renovavel[j])
+                    
+
+                for j in range(self.qtde_recursos_nao_renovavel):
+                    maximal_non_renewable[j] = max(maximal_non_renewable[j], modo.qtde_recurso_nao_renovavel[j])
+                    minimal_non_renewable[j] = min(minimal_non_renewable[j], modo.qtde_recurso_nao_renovavel[j])
+                    k_non_renewable_min[j] += minimal_non_renewable[j]
+                    k_non_renewable_max[j] += maximal_non_renewable[j]
+            horizon += horizon_i
+
+        min_usage_renw = [[999999 for _ in range(self.qtde_recursos_renovavel)] for _ in range(self.qtde_tarefas+2)]
+        for i, task in self.tarefas.items():
+            if i == 0 or i == self.qtde_tarefas + 1:
+                continue
+            for modo in task.modos:
+                for j in range(self.qtde_recursos_renovavel):
+                    min_usage_renw[i][j] = min(min_usage_renw[i][j], modo.qtde_recurso_renovavel[j])
+            for j in range(self.qtde_recursos_renovavel):
+                k_renewable_min[j] = max(k_renewable_min[j], min_usage_renw[i][j])
+            pass
+        # print(f"Min usage renw: {min_usage_renw}")
+        # print(f"Max usage renw: {k_renewable_min}")
+        kjr_ = [[0 for _ in range(self.qtde_recursos_renovavel)] for _ in range(self.qtde_tarefas + 2)]
+        mjr_ = [[0 for _ in range(self.qtde_recursos_renovavel)] for _ in range(self.qtde_tarefas + 2)]
+        for idx, task in self.tarefas.items():
+            for modo in task.modos:
+                for j in range(self.qtde_recursos_renovavel):
+                    if kjr_[idx][j] < modo.qtde_recurso_renovavel[j]:
+                        kjr_[idx][j] = modo.qtde_recurso_renovavel[j]
+                        mjr_[idx][j] = modo.id
+
+        from pprint import pprint as p
+        # p(kjr_)
+        # p(mjr_)
+
+        ordencao_topologica = self.get_ordencao_topologica()
+        utilizacao_de_recurso = [[0 for _ in range(self.qtde_recursos_renovavel)] for _ in range(horizon)]
+        tempo_inicio_tarefas = [[0 for _ in range(self.qtde_recursos_renovavel)] for _ in range(self.qtde_tarefas + 2)]
+        for i in ordencao_topologica:
+            for j in range(self.qtde_recursos_renovavel):
+                qtde_recurso = self.tarefas[i].modos[mjr_[i][j]].qtde_recurso_renovavel[j]
+                tempo_inicio = 0
+                for antecessor in self.tarefas[i].antecessores:
+                    tempo_inicio = max(tempo_inicio, tempo_inicio_tarefas[antecessor][j] + self.tarefas[antecessor].modos[mjr_[antecessor][j]].duracao)
+                tempo_inicio_tarefas[i][j] = tempo_inicio
+                for t in range(tempo_inicio, tempo_inicio + self.tarefas[i].modos[mjr_[i][j]].duracao):
+                    utilizacao_de_recurso[t][j] += qtde_recurso
+        
+        # for idx, t_ini in enumerate(tempo_inicio_tarefas):
+        #     print(f"Tarefa {idx}: {t_ini} - modo {mjr_[idx]}")
+        
+        max_usage_renewable_per_resource_type = [0 for _ in range(self.qtde_recursos_renovavel)]
+        for i in range(self.qtde_recursos_renovavel):
+            for j in range(horizon):
+                max_usage_renewable_per_resource_type[i] = max(max_usage_renewable_per_resource_type[i], utilizacao_de_recurso[j][i])
+        
+        # print(f"Max usage renewable per resource type: {max_usage_renewable_per_resource_type}")
+
+        print(f"Maximal renewable: {maximal_renewable}")
+        print(f"Minimal renewable: {minimal_renewable}")
+        print(f"Maximal non renewable: {maximal_non_renewable}")
+        print(f"Minimal non renewable: {minimal_non_renewable}")
+        print(f"K non renewable min: {k_non_renewable_min}")
+        print(f"K non renewable max: {k_non_renewable_max}")
+        print(f"max_usage_renewable_per_resource_type: {max_usage_renewable_per_resource_type}")
+        print(f"K renewable min: {k_renewable_min}")
+
+        import math
+        krn = [0 for _ in range(self.qtde_recursos_renovavel)]
+        knr = [0 for _ in range(self.qtde_recursos_nao_renovavel)]
+        for rr in range(self.qtde_recursos_renovavel):
+            krn[rr] = k_renewable_min[rr] + math.ceil(self.resource_strength * (max_usage_renewable_per_resource_type[rr] - k_renewable_min[rr]))
+        for nr in range(self.qtde_recursos_nao_renovavel):
+            knr[nr] = k_non_renewable_min[nr] + math.ceil(self.resource_strength * (k_non_renewable_max[nr] - k_non_renewable_min[nr]))
+
+        print(f"Renovaveis: {krn}")
+        print(f"Nao-renovaveis: {knr}")
+        self.recursos_renovaveis = krn
+        self.recursos_nao_renovaveis = knr
+
+        pass
+    
+    def get_ordencao_topologica(self):
+        import queue
+        ordencao_topologica = []
+        grau_entrada = [0 for _ in range(self.qtde_tarefas + 2)]
+        for idx, task in self.tarefas.items():
+            grau_entrada[idx] = len(task.antecessores)
+        q = queue.Queue()
+        for idx, task in self.tarefas.items():
+            if grau_entrada[idx] == 0:
+                q.put(idx)
+        while not q.empty():
+            u = q.get()
+            ordencao_topologica.append(u)
+            for v in self.tarefas[u].sucessores:
+                grau_entrada[v] -= 1
+                if grau_entrada[v] == 0:
+                    q.put(v)
+        return ordencao_topologica
+    
 
     def gerar_tarefas(self):
         self.tarefas[0] = Task(0, set(random.sample(range(1, self.qtde_tarefas + 1), random.randint(1, (self.qtde_tarefas % 10) + 1))), [Mode(0, 0, [0 for _ in range(self.qtde_recursos_renovavel)],[0 for _ in range(self.qtde_recursos_nao_renovavel)])] )
@@ -150,7 +273,7 @@ class Instance:
                     vai_usar_o_recurso = random.random() < self.resource_factor
                     recurso = 0
                     if vai_usar_o_recurso:
-                        recurso = random.randint(self.min_uso_recurso, self.max_uso_recurso)
+                        recurso = random.randint(self.fator_min_uso_recurso, self.fator_max_uso_recurso)
                         recurso = int(recurso/fator_uso)
                     uso_recurso_renovavel.append(recurso)
                 uso_recurso_nao_renovavel = []
@@ -158,7 +281,7 @@ class Instance:
                     vai_usar_o_recurso = random.random() < self.resource_factor
                     recurso = 0
                     if vai_usar_o_recurso:
-                        recurso = random.randint(self.min_uso_recurso, self.max_uso_recurso)
+                        recurso = random.randint(self.fator_min_uso_recurso, self.fator_max_uso_recurso)
                         recurso = int(recurso/fator_uso)
                     uso_recurso_nao_renovavel.append(recurso)
                 modos.append(Mode(j, duracao, uso_recurso_renovavel,uso_recurso_nao_renovavel))
@@ -189,6 +312,7 @@ class Instance:
         total_arcs = []
         activities = list(range(1, self.qtde_tarefas + 1))
 
+        # Passo 1
         start_activities = random.sample(activities, random.choice(num_start))
         # finish activities precisam ser diferentes de start activities
         sucessores[0] = set(start_activities)
@@ -202,6 +326,7 @@ class Instance:
             activities.remove(finish)
             sucessores[finish] = {self.qtde_tarefas + 1}
             total_arcs.append((finish, self.qtde_tarefas + 1))
+
         maximal_non_redundant_arcs = 0
         if self.qtde_tarefas % 2 == 0:
             maximal_non_redundant_arcs = self.qtde_tarefas - 2 + ((self.qtde_tarefas-2)/2)**2
@@ -229,6 +354,7 @@ class Instance:
         
         non_redundant_arcs = []
 
+        # Passo 2
         for ac in non_start_activities:
             pred = random.choice(start_activities + activities)
             while pred == ac or len(sucessores[pred]) >= self.max_sucessores or has_path(sucessores, ac, pred, set()):
@@ -237,7 +363,7 @@ class Instance:
             predecessores[ac].add(pred)
             sucessores[pred].add(ac)
             total_arcs.append((pred, ac))
-
+        # Passo 3
         for ac in sorted(start_activities + activities):
             if len(sucessores[ac]) == 0:
                 # print(f"Colocando sucessor para {ac}")
@@ -252,7 +378,7 @@ class Instance:
         non_redundant_arcs = [arc for arc in total_arcs if arc not in redundant_arcs]
         c = len(non_redundant_arcs)/len(sucessores)
         
-
+        # Passo 4
         # for i in range(100):
         while c < 1.5 and len(non_redundant_arcs) < maximal_non_redundant_arcs:
             for ac in sorted(activities + finish_activities):
@@ -320,10 +446,23 @@ def find_redundant_arcs(graph:List[set[int]]):
 
 
 if __name__ == "__main__":
-    instance = Instance(seed=19, qtde_tarefas=10)
-    instance.visualizar_grafo()
+    instance = Instance(seed=23485729, qtde_tarefas=10)
+    # instance.visualizar_grafo()
+   
     # with open('instance.txt', 'w') as f:
-    #     f.write(f"RF renovavel: {instance.calculate_resource_factor_for_type(renovavel=True)}\n")
-    #     f.write(f"RF nao renovavel: {instance.calculate_resource_factor_for_type(renovavel=False)}\n")
     #     f.write(str(instance))
+
+
+    # import pandas as pd
+    # # create a dataframe to show all acitivties and its modes
+    # data = []
+    # # fazer uma coluna pra cada recurso
+    # for i in range(instance.qtde_tarefas + 2):
+    #     for modo in instance.tarefas[i].modos:
+    #         data.append([i, modo.id, modo.duracao] + modo.qtde_recurso_renovavel + modo.qtde_recurso_nao_renovavel)
+    # df = pd.DataFrame(data, columns=['Tarefa', 'Modo', 'Duracao'] + [f"Recurso Renovavel {i}" for i in range(instance.qtde_recursos_renovavel)] + [f"Recurso Nao Renovavel {i}" for i in range(instance.qtde_recursos_nao_renovavel)])
+    
+    # with pd.ExcelWriter('instance.xlsx') as writer:
+    #     df.to_excel(writer, sheet_name='Instance', index=False)
+
     
