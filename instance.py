@@ -1,10 +1,10 @@
 import random
 import matplotlib.pyplot as plt
-from typing import List, Dict, Set
+from typing import List, Dict, Set, Any
 import graphviz
+import logging
 
-
-from typing import Any
+from utils import find_redundant_arcs, indiretos
 
 class Graph:
     def __init__(self):
@@ -17,9 +17,8 @@ class Graph:
     def add_edge(self, start, end):
         self.edges.append((start, end))
 
-    def visualize(self, seed, qtde_tarefas):
-        #* Usar graphviz para visualizar o grafo
-        dot = graphviz.Digraph(comment='Grafo de precedência')
+    def visualize(self, seed, qtde_tarefas, save = False):
+        dot = graphviz.Digraph(comment='Grafo de precedência', graph_attr={'rankdir':'LR'})
         for node in self.nodes:
             dot.node(str(node))
         for start, end in self.edges:
@@ -28,9 +27,14 @@ class Graph:
         import os
         if not os.path.exists('graphs'):
             os.mkdir('graphs')
+
         
-        path = dot.render(filename=f"{seed}-{qtde_tarefas}", directory='graphs', format='png', view=True, cleanup=True)
-        print(f"Visualização do grafo salva em {path}")
+        if save:
+            path = dot.render(filename=f"{seed}-{qtde_tarefas}", directory='graphs', format='png', view=True, cleanup=True)
+            print(f"Visualização do grafo salva em {path}")
+        else:
+            dot.render(format='png', view=True, cleanup=True)
+
 
 class Mode:
     def __init__(self, _id: int, duracao: int, qtde_recurso_renovavel: List[int], qtde_recurso_nao_renovavel: List[int]):
@@ -66,8 +70,9 @@ class Instance:
     def __init__(self, seed, qtde_tarefas) -> None:
         if qtde_tarefas < 7:
             raise ValueError("Quantidade de tarefas deve ser maior ou igual a 7")
+        logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
         # constantes
-        self.max_duracao = 120
+        self.max_duracao = 50
         self.min_duracao = 10
         self.max_recursos = 5
         self.min_recursos = 2
@@ -77,11 +82,18 @@ class Instance:
         self.max_modos = 4
         self.max_sucessores = int(3)
         self.resource_factor = 0.5 # O que vai decidir se o recurso r é usado ou não pela atividade
-        self.resource_strength = 0.5
+        self.resource_strength = 0.2 # O que vai influenciar na quantidade final de recurso renovavel
+        self.complexidade_maxima = 1.5
+        self.min_atividades_iniciais = 3
+        self.max_atividades_iniciais = 3
+        self.min_atividades_finais = 3
+        self.max_atividades_finais = 3
         
         # Use a seed para inicializar o gerador de números aleatórios
         self.seed: int = seed
         random.seed(seed)
+
+        self.horizon = 0
         
         # Defina a quantidade inicial de projetos
         self.qtde_projetos = 1
@@ -96,9 +108,11 @@ class Instance:
         # Gere a quantidade de tarefas com base na seed
         self.qtde_tarefas: int = qtde_tarefas
 
+        self.possivel = True
+
         self.start()
     
-    def __str__(self):
+    def print(self):
         out = f"Seed: {self.seed} - Quantidade de tarefas: {self.qtde_tarefas} - Quantidade de recursos renovaveis: {self.qtde_recursos_renovavel} - Quantidade de recursos nao renovaveis: {self.qtde_recursos_nao_renovavel}\n"
         out += f"Recursos renováveis {self.recursos_renovaveis}\n"
         out += f"Recursos nao renovaveis {self.recursos_nao_renovaveis}\n"
@@ -129,9 +143,17 @@ class Instance:
         return soma / self.qtde_tarefas
 
     def start(self):
-        self.gerar_tarefas()
-        self.gerar_relacao_precedencia_2()
-        self.gerar_recursos()
+        try:
+            self.gerar_tarefas()
+            self.gerar_relacao_precedencia_2()
+            self.gerar_recursos()
+            print(f"Finalizou a geração da instância com seed {self.seed}.")
+        except Exception as e:
+            # print(f"Seed: {self.seed} não funciona, precisa recomeçar com outra seed.")
+            logging.error(f"Seed: {self.seed} não funciona, precisa recomeçar com outra seed.")
+            self.possivel = False
+            
+            
 
     def gerar_recursos(self):
         # for _ in range(self.qtde_recursos_renovavel):
@@ -187,7 +209,6 @@ class Instance:
                         kjr_[idx][j] = modo.qtde_recurso_renovavel[j]
                         mjr_[idx][j] = modo.id
 
-        from pprint import pprint as p
         # p(kjr_)
         # p(mjr_)
 
@@ -214,14 +235,14 @@ class Instance:
         
         # print(f"Max usage renewable per resource type: {max_usage_renewable_per_resource_type}")
 
-        print(f"Maximal renewable: {maximal_renewable}")
-        print(f"Minimal renewable: {minimal_renewable}")
-        print(f"Maximal non renewable: {maximal_non_renewable}")
-        print(f"Minimal non renewable: {minimal_non_renewable}")
-        print(f"K non renewable min: {k_non_renewable_min}")
-        print(f"K non renewable max: {k_non_renewable_max}")
-        print(f"max_usage_renewable_per_resource_type: {max_usage_renewable_per_resource_type}")
-        print(f"K renewable min: {k_renewable_min}")
+        # print(f"Maximal renewable: {maximal_renewable}")
+        # print(f"Minimal renewable: {minimal_renewable}")
+        # print(f"Maximal non renewable: {maximal_non_renewable}")
+        # print(f"Minimal non renewable: {minimal_non_renewable}")
+        # print(f"K non renewable min: {k_non_renewable_min}")
+        # print(f"K non renewable max: {k_non_renewable_max}")
+        # print(f"max_usage_renewable_per_resource_type: {max_usage_renewable_per_resource_type}")
+        # print(f"K renewable min: {k_renewable_min}")
 
         import math
         krn = [0 for _ in range(self.qtde_recursos_renovavel)]
@@ -231,8 +252,8 @@ class Instance:
         for nr in range(self.qtde_recursos_nao_renovavel):
             knr[nr] = k_non_renewable_min[nr] + math.ceil(self.resource_strength * (k_non_renewable_max[nr] - k_non_renewable_min[nr]))
 
-        print(f"Renovaveis: {krn}")
-        print(f"Nao-renovaveis: {knr}")
+        # print(f"Renovaveis: {krn}")
+        # print(f"Nao-renovaveis: {knr}")
         self.recursos_renovaveis = krn
         self.recursos_nao_renovaveis = knr
 
@@ -265,8 +286,10 @@ class Instance:
         for i in range(1, self.qtde_tarefas + 1):
             qtde_modos = random.randint(self.min_modos, self.max_modos)
             modos = []
+            maximal_duration = 0
             for j in range(qtde_modos):
                 duracao = random.randint(self.min_duracao, self.max_duracao)
+                maximal_duration = max(maximal_duration, duracao)
                 fator_uso = duracao/self.max_duracao
                 uso_recurso_renovavel = []
                 for k in range(self.qtde_recursos_renovavel):
@@ -285,6 +308,7 @@ class Instance:
                         recurso = int(recurso/fator_uso)
                     uso_recurso_nao_renovavel.append(recurso)
                 modos.append(Mode(j, duracao, uso_recurso_renovavel,uso_recurso_nao_renovavel))
+            self.horizon += maximal_duration
             self.tarefas[i] = Task(i, set(), modos)
         
 
@@ -303,37 +327,64 @@ class Instance:
 
 
     
-    def gerar_relacao_precedencia_2(self):
-        num_start = [3, 3]
-        num_finish = [3, 3]
+    def gerar_relacao_precedencia_2(self) -> None:
+        num_start = [self.min_atividades_iniciais, self.max_atividades_iniciais]
+        num_finish = [self.min_atividades_iniciais, self.max_atividades_finais]
         empty_list: set[int] = set()
         sucessores: List[set[int]] = [empty_list.copy() for _ in range(self.qtde_tarefas + 2)]
         predecessores: List[set[int]] = [empty_list.copy() for _ in range(self.qtde_tarefas + 2)]
         total_arcs = []
         activities = list(range(1, self.qtde_tarefas + 1))
 
-        # Passo 1
+        #* Passo 1
         start_activities = random.sample(activities, random.choice(num_start))
         # finish activities precisam ser diferentes de start activities
         sucessores[0] = set(start_activities)
         for start in start_activities:
-            activities.remove(start)
             predecessores[start] = {0}
             total_arcs.append((0, start))
         finish_activities = random.sample(activities, random.choice(num_finish))
         predecessores[self.qtde_tarefas + 1] = set(finish_activities)
         for finish in finish_activities:
-            activities.remove(finish)
             sucessores[finish] = {self.qtde_tarefas + 1}
             total_arcs.append((finish, self.qtde_tarefas + 1))
 
+        
+        # Single activities sao as que sao tanto iniciais quanto finais ao mesmo tempo
+        single_activities = list(set(start_activities).intersection(set(finish_activities)))
+
+        # removendo as atividades iniciais e finais da lista de atividades
+        activities = set(activities)
+        finish_activities = set(finish_activities)
+        start_activities = set(start_activities)
+
+        for start in start_activities:
+            activities.discard(start)
+        for finish in finish_activities:
+            activities.discard(finish)
+        for single in single_activities:
+            finish_activities.discard(single)
+            start_activities.discard(single)
+
+        activities = list(activities)
+        start_activities = list(start_activities)
+        finish_activities = list(finish_activities)
+
+        # print(f"Start activities: {start_activities}")
+        # print(f"Finish activities: {finish_activities}")
+        # print(f"Single activities: {single_activities}")
+        # print(f"Activities: {activities}")
+
+        # return
+        
+        # Todo: Analisar quais atividades vao ser contabilizadas nesse calculo para saber a quantidade maxima de arcos nao redundatnes, porque alguns nos vao ser desconsiderados
+        
         maximal_non_redundant_arcs = 0
-        if self.qtde_tarefas % 2 == 0:
-            maximal_non_redundant_arcs = self.qtde_tarefas - 2 + ((self.qtde_tarefas-2)/2)**2
-            pass
+        num_atividades = self.qtde_tarefas - len(start_activities) - len(finish_activities) - len(single_activities)
+        if num_atividades % 2 == 0:
+            maximal_non_redundant_arcs = num_atividades - 2 + ((num_atividades-2)/2)**2
         else:
-            maximal_non_redundant_arcs = self.qtde_tarefas - 2 + ((self.qtde_tarefas-1)/2) * ((self.qtde_tarefas-3)/2)
-            pass
+            maximal_non_redundant_arcs = num_atividades - 2 + ((num_atividades-1)/2) * ((num_atividades-3)/2)
 
         # media dos arcos nao redundantes por nodo
         c = 0
@@ -354,33 +405,53 @@ class Instance:
         
         non_redundant_arcs = []
 
-        # Passo 2
+        #* Passo 2
         for ac in non_start_activities:
             pred = random.choice(start_activities + activities)
-            while pred == ac or len(sucessores[pred]) >= self.max_sucessores or has_path(sucessores, ac, pred, set()):
+            while pred == ac or len(sucessores[pred]) >= self.max_sucessores or self.is_redundant(pred, ac, sucessores, predecessores):
                 pred = random.choice(start_activities + activities)
-            
+            # print(f"Pred: {pred} - Ac: {ac}")
             predecessores[ac].add(pred)
             sucessores[pred].add(ac)
             total_arcs.append((pred, ac))
-        # Passo 3
+
+        # print("Finalizou passo 2")
+        # for i in range(len(sucessores)):
+        #     print(f"{i}: {predecessores[i]} - {sucessores[i]}")
+        
+        #* Passo 3
         for ac in sorted(start_activities + activities):
             if len(sucessores[ac]) == 0:
                 # print(f"Colocando sucessor para {ac}")
+                # p(sucessores)
                 suc = random.choice(non_start_activities)  
-                while suc == ac or has_path(sucessores, suc, ac, set()):
+                cont = 1
+                while suc == ac or self.is_redundant(ac, suc, sucessores, predecessores):
                     suc = random.choice(non_start_activities)
+                    cont += 1
+                    # print(f"Cont: {cont} - len: {len(non_start_activities)}")
+                    if cont >= len(non_start_activities):
+                        raise Exception("Nao foi possivel adicionar um sucessor")
+                        # warnings.warn(f"seed: {self.seed} não funciona, precisa recomeçar com outra seed.")
+                        
+                        pass
+                
+                # print(f"Pred: {ac} - Suc: {suc}")
                 sucessores[ac].add(suc)
                 predecessores[suc].add(ac)
                 total_arcs.append((ac, suc))
+
+        # print("Finalizou passo 3")
         
         redundant_arcs = find_redundant_arcs(sucessores)
         non_redundant_arcs = [arc for arc in total_arcs if arc not in redundant_arcs]
         c = len(non_redundant_arcs)/len(sucessores)
-        
-        # Passo 4
-        # for i in range(100):
-        while c < 1.5 and len(non_redundant_arcs) < maximal_non_redundant_arcs:
+
+        #* Passo 4: Adicionar arestas redundantes ate que algum limite seja estabelecido
+        for i in range(100):
+        # while c < self.complexidade_maxima and len(non_redundant_arcs) < maximal_non_redundant_arcs:
+            # print(f"Complexidade: {c} - {len(non_redundant_arcs)}")
+            #* Para cada atividade, vai tentar adicionar um predecessor
             for ac in sorted(activities + finish_activities):
                 pred = random.choice(activities + start_activities)
                 while pred == ac:
@@ -404,54 +475,127 @@ class Instance:
         # for i in range(self.qtde_tarefas + 2):
         #     print(f"{i}: {predecessores[i]} - {sucessores[i]}")
 
+
+        # exit()
+
         for i in range(self.qtde_tarefas + 2):
             self.tarefas[i].sucessores = sucessores[i]
             self.tarefas[i].antecessores = predecessores[i]
 
         
-    def visualizar_grafo(self):
+    def visualizar_grafo(self, save = False):
+        if not self.possivel:
+            logging.error(f"Seed: {self.seed} não é possível visualizar o grafo.")
+            return
         grafo = Graph()
         for tarefa in self.tarefas.values():
             for sucessor in tarefa.sucessores:
                 grafo.add_edge(tarefa.id, sucessor)
             grafo.add_node(tarefa.id)
-        grafo.visualize(self.seed, self.qtde_tarefas)
+        grafo.visualize(self.seed, self.qtde_tarefas, save=save)
 
+    def is_redundant(self, i:int, j:int, sucs: list[set[int]], preds: list[set[int]]) -> bool:
+            #* 1: (i, j) Se j é um sucessor indireto de i
+        if j in indiretos(sucs, i):
+            return True
 
-def dfs(graph: List[List[int]], start:int, end:int, visited: dict[int,bool], path_length: int):
-    if start == end:
-        return path_length >= 2
-    
-    visited[start] = True
-    for neighbor in graph[start]:
-        if not visited[neighbor]:
-            if dfs(graph, neighbor, end, visited, path_length + 1):
+        #* 2: (i, j) se i e j tiverem um predecessor em comum
+        #* Intercessao entre predecessores imediatos de j com predecessores (indiretos) de i for diferente de vazio
+        pred_imediato_j = preds[j]
+        pred_indireto_i = set(indiretos(preds, i))
+        if len(pred_imediato_j.intersection(pred_indireto_i)) > 0:
+            return True
+
+        #* 3: (i, j) se existe um k que é sucessor indireto de j tal que a intercessao entre os predecessores imediatos de k com os predecessores de i seja diferente de vazio
+        for k in indiretos(sucs, j):
+            pred_imediato_k = preds[k]
+            if len(pred_imediato_k.intersection(pred_indireto_i)) > 0:
                 return True
-    
-    visited[start] = False
-    return False
 
-def is_redundant_arc(graph:List[List[int]], h:int, j:int):
-    visited = {node: False for node in range(len(graph))}
-    return dfs(graph, h, j, visited, 0)
+        #* 4: (i, j) se a intercessao entre os sucessores imediatos de i com sucessores (indiretos) de j for diferente de vazio
+        suc_imediato_i = sucs[i]
+        suc_indireto_j = set(indiretos(sucs, j))
+        if len(suc_imediato_i.intersection(suc_indireto_j)) > 0:
+            return True
 
-def find_redundant_arcs(graph:List[set[int]]):
-    redundant_arcs = []
-    graph_to_list = [list(h) for h in graph]
-    for h, i in enumerate(graph_to_list):
-        for j in i:
-            if is_redundant_arc(graph_to_list, h, j):
-                redundant_arcs.append((h, j))
-    return redundant_arcs
+        return False
+        
+    def __str__(self):
+        out = ""
+        out += "seed " + str(self.seed) + "\n"
+        out += "horizon " + str(self.horizon) + "\n"
+        out += "jobs " + str(self.qtde_tarefas+2) + "\n"
+        out += "RESOURCES\n"
+        out += "renewable " + str(self.qtde_recursos_renovavel) + " r\n"
+        out += "non-renewable " + str(self.qtde_recursos_nao_renovavel) + " n\n"
+        out += "double " + str(0) + " d\n"
+        out += "*"*25 + "\n"
+        out += "pronr.\n"
+        out += "Apenas caso queira mais informacoes, adicionar aqui\n"
+        out += "*"*25 + "\n"
+        out += "PRECEDENCE\n"
+        out += "jobnr.    #modes  #successors   successors\n"
+        # printar as relacoes de precedencia
+        #    1        1          3           2   3   4
+        for i in range(self.qtde_tarefas + 2):
+            out += str(i+1) + " " + str(len(self.tarefas[i].modos)) + " " + str(len(self.tarefas[i].sucessores))
+            for sucessor in self.tarefas[i].sucessores:
+                out += " " + str(sucessor+1)
+            out += "\n"
+        out += "*"*25 + "\n"
+        out += "REQUESTS/DURATIONS:\n"
+        out += "jobnr. mode duration "
+        out += "\t"
+        for i in range(self.qtde_recursos_renovavel):
+            out += "R" + str(i+1) + "\t"
+        for i in range(self.qtde_recursos_nao_renovavel):
+            out += "N" + str(i+1) + "\t"
+        out += "\n"
+        out += "-"*25 + "\n"
+        for i in range(self.qtde_tarefas + 2):
+            id_tarefa = i + 1
+            out += str(id_tarefa) + " 1 " + str(self.tarefas[i].modos[0].duracao) + " "
+            for recurso in self.tarefas[i].modos[0].qtde_recurso_renovavel:
+                out += str(recurso) + " "
+            for recurso in self.tarefas[i].modos[0].qtde_recurso_nao_renovavel:
+                out += str(recurso) + " "
+            out += "\n"
+            for modo in self.tarefas[i].modos[1:]:
+                # print("="*20, modo.id+1, "="*20)
+                out += str(modo.id+1) + " "
+                out += str(modo.duracao) + " "
+                for recurso in modo.qtde_recurso_renovavel:
+                    out += str(recurso) + " "
+                for recurso in modo.qtde_recurso_nao_renovavel:
+                    out += str(recurso) + " "
+                out += "\n"
+        out += "*"*25 + "\n"
+        out += "RESOURCEAVAILABILITIES:\n"
+        for i in range(self.qtde_recursos_renovavel):
+            out += "R " + str(i+1) + " "
+        for i in range(self.qtde_recursos_nao_renovavel):
+            out += "N " + str(i+1) + " "
+        out += "\n"
+        for i in range(self.qtde_recursos_renovavel):
+            out += str(self.recursos_renovaveis[i]) + " "
+        for i in range(self.qtde_recursos_nao_renovavel):
+            out += str(self.recursos_nao_renovaveis[i]) + " "
+        out += "\n"
+
+        return out
 
 
 if __name__ == "__main__":
-    instance = Instance(seed=23485729, qtde_tarefas=10)
+    seed = 388102 + 1 - 1
+    print(f"Seed: {seed}")
+    instance = Instance(seed=seed, qtde_tarefas=10)
+    with open("j-test.mm", "w") as f:
+        f.write(str(instance))
+    # print(instance)
+    # print(instance.print())
     # instance.visualizar_grafo()
-   
     # with open('instance.txt', 'w') as f:
     #     f.write(str(instance))
-
 
     # import pandas as pd
     # # create a dataframe to show all acitivties and its modes
@@ -465,4 +609,5 @@ if __name__ == "__main__":
     # with pd.ExcelWriter('instance.xlsx') as writer:
     #     df.to_excel(writer, sheet_name='Instance', index=False)
 
+    pass
     

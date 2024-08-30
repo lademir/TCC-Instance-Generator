@@ -19,10 +19,18 @@ def main():
     if os.path.exists(f"instancias_{qtde_atividades}"):
         shutil.rmtree(f"instancias_{qtde_atividades}")
     os.mkdir(f"instancias_{qtde_atividades}")
-    for i in range(qtde_instances):
+    # for i in range(qtde_instances):
+    #     seed = random.randint(1, 9999999999)
+    #     instance = Instance(seed=seed, qtde_tarefas=qtde_atividades)
+    #     save_instance(instance, i)
+    qtde_saved_instances = 0
+    while qtde_saved_instances < qtde_instances:
         seed = random.randint(1, 9999999999)
         instance = Instance(seed=seed, qtde_tarefas=qtde_atividades)
-        save_instance(instance, i)
+        if instance.possivel:
+            save_instance(instance, qtde_saved_instances)
+            qtde_saved_instances += 1
+
 
 if __name__ == "__main__":
     main()
