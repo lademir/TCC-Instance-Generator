@@ -72,16 +72,19 @@ class Instance:
             raise ValueError("Quantidade de tarefas deve ser maior ou igual a 7")
         logging.basicConfig(level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
         # constantes
-        self.max_duracao = 50
+        self.max_duracao = 30
         self.min_duracao = 10
         self.max_recursos = 5
         self.min_recursos = 2
-        self.fator_max_uso_recurso = 100
-        self.fator_min_uso_recurso = 10
+        self.fator_max_uso_recurso_renovavel = 50
+        self.fator_min_uso_recurso_renovavel = 10
+        self.fator_min_uso_recurso_nao_renovavel = 50
+        self.fator_max_uso_recurso_nao_renovavel = 150
+        self.percent_usa_recurso_unico = 0.1 # 10% de chance de usar um recurso unico
         self.min_modos = 1
         self.max_modos = 4
         self.max_sucessores = int(3)
-        self.resource_factor = 0.5 # O que vai decidir se o recurso r é usado ou não pela atividade
+        self.resource_factor = 0.6 # O que vai decidir se o recurso r é usado ou não pela atividade
         self.resource_strength = 0.2 # O que vai influenciar na quantidade final de recurso renovavel
         self.complexidade_maxima = 1.5
         self.min_atividades_iniciais = 3
@@ -100,7 +103,9 @@ class Instance:
         self.tarefas: Dict[int, Task] = {}
 
         # Recursos
-        self.qtde_recursos_renovavel: int = random.randint(self.min_recursos, self.max_recursos) 
+        qtde = random.randint(self.min_recursos, self.max_recursos)
+        # print(f"Foram escolhidos {qtde} recursos renovaveis fora o recurso unico")
+        self.qtde_recursos_renovavel: int = qtde + 1 # +1 para ser o recurso unico (de 1 unidade)
         self.qtde_recursos_nao_renovavel: int = random.randint(self.min_recursos, self.max_recursos) 
         self.recursos_renovaveis: List[int] = []
         self.recursos_nao_renovaveis: List[int] = []
@@ -149,7 +154,7 @@ class Instance:
             self.gerar_recursos()
             print(f"Finalizou a geração da instância com seed {self.seed}.")
         except Exception as e:
-            # print(f"Seed: {self.seed} não funciona, precisa recomeçar com outra seed.")
+            print(f"Exception: {e}")
             logging.error(f"Seed: {self.seed} não funciona, precisa recomeçar com outra seed.")
             self.possivel = False
             
@@ -257,6 +262,9 @@ class Instance:
         self.recursos_renovaveis = krn
         self.recursos_nao_renovaveis = knr
 
+        if knr[-1] > 0:
+            self.recursos_renovaveis[-1] = 1
+
         pass
     
     def get_ordencao_topologica(self):
@@ -280,31 +288,55 @@ class Instance:
     
 
     def gerar_tarefas(self):
-        self.tarefas[0] = Task(0, set(random.sample(range(1, self.qtde_tarefas + 1), random.randint(1, (self.qtde_tarefas % 10) + 1))), [Mode(0, 0, [0 for _ in range(self.qtde_recursos_renovavel)],[0 for _ in range(self.qtde_recursos_nao_renovavel)])] )
+        self.tarefas[0] = Task(0, set(), [Mode(0, 0, [0 for _ in range(self.qtde_recursos_renovavel)],[0 for _ in range(self.qtde_recursos_nao_renovavel)])] )
         self.tarefas[self.qtde_tarefas + 1] = Task(self.qtde_tarefas + 1, set(), [Mode(0, 0, [0 for _ in range(self.qtde_recursos_renovavel)], [0 for _ in range(self.qtde_recursos_nao_renovavel)])])
 
         for i in range(1, self.qtde_tarefas + 1):
             qtde_modos = random.randint(self.min_modos, self.max_modos)
+            # print(f"Tarefa {i} - {qtde_modos} modos")
             modos = []
             maximal_duration = 0
+            vai_usar_recurso_unico = random.random() < self.percent_usa_recurso_unico
             for j in range(qtde_modos):
                 duracao = random.randint(self.min_duracao, self.max_duracao)
                 maximal_duration = max(maximal_duration, duracao)
                 fator_uso = duracao/self.max_duracao
                 uso_recurso_renovavel = []
+                # for k in range(self.qtde_recursos_renovavel):
+                #     if k < self.qtde_recursos_renovavel - 1:
+                #         recurso = 0
+                #         vai_usar_o_recurso = random.random() < self.resource_factor
+                #         if vai_usar_o_recurso:
+                #             recurso = random.randint(self.fator_min_uso_recurso_renovavel, self.fator_max_uso_recurso_renovavel)
+                #             recurso = int(recurso/fator_uso)
+                #         uso_recurso_renovavel.append(recurso)
+                #     else: # quando for o recurso unico
+                #         if vai_usar_recurso_unico:
+                #             recurso = 1
+                #             print(f"Tarefa {i} - Modo {j} - Recurso unico")
+                #             uso_recurso_renovavel.append(recurso)
+
                 for k in range(self.qtde_recursos_renovavel):
-                    vai_usar_o_recurso = random.random() < self.resource_factor
                     recurso = 0
-                    if vai_usar_o_recurso:
-                        recurso = random.randint(self.fator_min_uso_recurso, self.fator_max_uso_recurso)
-                        recurso = int(recurso/fator_uso)
-                    uso_recurso_renovavel.append(recurso)
+                    if k < self.qtde_recursos_renovavel-1: # nao eh o ultimo recurso (recurso unico)
+                        vai_usar_o_recurso = random.random() < self.resource_factor
+                        if vai_usar_o_recurso:
+                            recurso = random.randint(self.fator_min_uso_recurso_renovavel, self.fator_max_uso_recurso_renovavel)
+                            recurso = int(recurso/fator_uso)
+                        uso_recurso_renovavel.append(recurso)
+                    else:
+                        if vai_usar_recurso_unico:
+                            # print(f"Tarefa {i} - Modo {j} - Recurso unico")
+                            recurso = 1
+                        uso_recurso_renovavel.append(recurso)
+
+
                 uso_recurso_nao_renovavel = []
                 for k in range(self.qtde_recursos_nao_renovavel):
                     vai_usar_o_recurso = random.random() < self.resource_factor
                     recurso = 0
                     if vai_usar_o_recurso:
-                        recurso = random.randint(self.fator_min_uso_recurso, self.fator_max_uso_recurso)
+                        recurso = random.randint(self.fator_min_uso_recurso_nao_renovavel, self.fator_max_uso_recurso_nao_renovavel)
                         recurso = int(recurso/fator_uso)
                     uso_recurso_nao_renovavel.append(recurso)
                 modos.append(Mode(j, duracao, uso_recurso_renovavel,uso_recurso_nao_renovavel))
@@ -586,11 +618,13 @@ class Instance:
 
 
 if __name__ == "__main__":
-    seed = 388102 + 1 - 1
+    seed = 892408
+    # seed = random.randint(0, 1000000)
     print(f"Seed: {seed}")
     instance = Instance(seed=seed, qtde_tarefas=10)
     with open("j-test.mm", "w") as f:
         f.write(str(instance))
+    print(instance.print())
     # print(instance)
     # print(instance.print())
     # instance.visualizar_grafo()

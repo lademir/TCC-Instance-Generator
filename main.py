@@ -14,8 +14,8 @@ def save_instance(ins: Instance, index: int):
         f.write(f"{ins}")
 
 def main():
-    qtde_instances = 10
-    qtde_atividades = 10
+    qtde_instances = 20
+    qtde_atividades = 18
     if os.path.exists(f"instancias_{qtde_atividades}"):
         shutil.rmtree(f"instancias_{qtde_atividades}")
     os.mkdir(f"instancias_{qtde_atividades}")
